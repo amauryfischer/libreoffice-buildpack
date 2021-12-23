@@ -89,6 +89,11 @@ if ! [ -e $CACHE_DIR/$FILE_NAME ]; then
   chmod a+x $FILE_NAME
   ./$FILE_NAME --appimage-extract
   mv squashfs-root "libreoffice-${VERSION}"
+
+  INSTALLED_VERSION=$(ls "${CACHE_DIR}/libreoffice-${VERSION}/opt")
+  cd "${CACHE_DIR}/libreoffice-${VERSION}/usr/bin"
+  [ -e "./libreoffice" ] || ln -s "${INSTALLED_VERSION}" libreoffice
+  cd $BUILD_DIR
 else
   echo "file already exists $CACHE_DIR/$FILE_NAME"
 fi
@@ -98,7 +103,7 @@ cp -R $CACHE_DIR/libreoffice-${VERSION}/opt $INSTALL_DIR
 
 PROFILE_PATH="$BUILD_DIR/.profile.d/libreoffice.sh"
 RUNTIME_INSTALL_PATH="\$HOME/vendor/libreoffice"
-mkdir -p $(dirname $PROFILE_PATH)
 INSTALLED_VERSION=$(ls $INSTALL_DIR/opt)
-echo "export PATH=$RUNTIME_INSTALL_PATH/opt/$INSTALLED_VERSION/program:\$PATH" >> $PROFILE_PATH
+mkdir -p $(dirname $PROFILE_PATH)
+echo "export PATH=$RUNTIME_INSTALL_PATH/usr/bin:$RUNTIME_INSTALL_PATH/opt/$INSTALLED_VERSION/program:\$PATH" >> $PROFILE_PATH
 echo "export OFFICE_PATH=$RUNTIME_INSTALL_PATH/opt/$INSTALLED_VERSION" >> $PROFILE_PATH
