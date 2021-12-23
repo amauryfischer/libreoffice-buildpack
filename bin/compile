@@ -1,6 +1,10 @@
 #!/bin/sh
 
-set -ex
+set -e
+
+if [ -n "$BUILDPACK_DEBUG" ] ; then
+  set -x
+fi
 
 BUILD_DIR=$1
 APT_DIR=$BUILD_DIR/.apt
