@@ -13,6 +13,61 @@ mkdir -p $VENDOR_DIR
 INSTALL_DIR="$VENDOR_DIR/libreoffice"
 mkdir -p $INSTALL_DIR
 CACHE_DIR=$2 # the contents of CACHE_DIR are persisted between builds
+ENV_DIR=$3
+
+install_jvm() {
+  local build_dir="$1"
+  local cache_dir="$2"
+  local env_dir="$3"
+
+  echo "Install JVM"
+
+  echo "java.runtime.version=${JAVA_VERSION:-11}" > "${build_dir}/system.properties"
+
+  jvm_buildpack_dir=$(mktemp jvm_buildpack_XXXX)
+  # only the name is interesting, deleting the temp empty file
+  rm "$jvm_buildpack_dir"
+
+  JVM_BUILDPACK_URL="${JVM_BUILDPACK_URL:-https://github.com/Scalingo/buildpack-jvm-common}"
+  git clone --depth=1 "$JVM_BUILDPACK_URL" "$jvm_buildpack_dir"
+
+  "${jvm_buildpack_dir}/bin/compile" "$build_dir" "$cache_dir" "$env_dir"
+
+  rm -r "$jvm_buildpack_dir"
+}
+
+install_apt_deps() {
+  local build_dir="$1"
+  local cache_dir="$2"
+  local env_dir="$3"
+
+  echo "Install dependencies with APT buildpack"
+
+  cat >> $build_dir/Aptfile <<EOF
+libsm6
+libice6
+libxinerama1
+libdbus-glib-1-2
+libharfbuzz0b
+libharfbuzz-icu0
+libx11-xcb1
+libxcb1
+EOF
+
+  apt_deps_buildpack_dir=$(mktemp apt_buildpack_XXXX)
+  # only the name is interesting, deleting the temp empty file
+  rm "$apt_deps_buildpack_dir"
+
+  APT_BUILDPACK_URL="${APT_BUILDPACK_URL:-https://github.com/Scalingo/apt-buildpack}"
+  git clone --depth=1 "$APT_BUILDPACK_URL" "$apt_deps_buildpack_dir"
+
+  "${apt_deps_buildpack_dir}/bin/compile" "$build_dir" "$cache_dir" "$env_dir"
+
+  rm -r "$apt_deps_buildpack_dir"
+}
+
+install_jvm "$BUILD_DIR" "$CACHE_DIR" "$ENV_DIR"
+install_apt_deps "$BUILD_DIR" "$CACHE_DIR" "$ENV_DIR"
 
 # libreoffice
 if [ -f $BUILD_DIR/LibreOfficeAppImage ] ; then

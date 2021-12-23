@@ -8,23 +8,11 @@ Particularly useful if you use the `libreconv` gem for document conversion to PD
 
 If you need the additional capabilities of headless LibreOffice 6, particularly for closer conversion of Office files to accurate PDFs, this buildpack is for you.
 
-Add a `.buildpacks` file to your project
+Add a `.buildpacks` file to your project with this buildpack and the one(s) you wish to use
 
 ```
-https://github.com/Scalingo/apt-buildpack
 https://github.com/Soulou/libreoffice-buildpack
-```
-
-Create an `Aptfile` file in your project root with the following content (do **not** include libreoffice here):
-```
-libsm6
-libice6
-libxinerama1
-libdbus-glib-1-2
-libharfbuzz0b
-libharfbuzz-icu0
-libx11-xcb1
-libxcb1
+https://github.com/Scalingo/<language>-buildpack
 ```
 
 Optionally, create a `LibreOfficeAppImage` file in your application repository to change the installed version to something other than the latest `fresh`.
