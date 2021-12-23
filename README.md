@@ -1,4 +1,4 @@
-# Fully working LibreOffice buildpack for the heroku-18 stack 🎉
+# Fully working LibreOffice buildpack 🎉
 
 Shamefully simple, and utilising an official AppImage copy of LibreOffice with its dependencies directly from the vendor... a working buildpack for LibreOffice 6.x (others possibly supported via a config file) on the heroku-18 stack (others possibly supported but you may be asking for trouble if you try), after a lot of trial & error.
 
@@ -8,19 +8,11 @@ Particularly useful if you use the `libreconv` gem for document conversion to PD
 
 If you need the additional capabilities of headless LibreOffice 6, particularly for closer conversion of Office files to accurate PDFs, this buildpack is for you.
 
-Add the `heroku-buildpack-apt` buildpack to your project:
-```
-heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-apt.git
-```
+Add a `.buildpacks` file to your project
 
-Add our LibreOffice buildpack to your project:
 ```
-heroku buildpacks:add --index 2 https://github.com/BlueTeaLondon/heroku-buildpack-libreoffice-for-heroku-18.git
-```
-
-Optionally, add the following buildpack, which provides a handy combination of fonts for LibreOffice to use:
-```
-heroku buildpacks:add --index 3 https://github.com/debitoor/heroku-buildpack-converter-fonts.git
+https://github.com/Scalingo/apt-buildpack
+https://github.com/Soulou/libreoffice-buildpack
 ```
 
 Create an `Aptfile` file in your project root with the following content (do **not** include libreoffice here):
