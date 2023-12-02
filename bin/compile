@@ -87,8 +87,7 @@ if ! [ -e $CACHE_DIR/$FILE_NAME ]; then
   echo "-----> extracting LibreOffice from AppImage archive"
   cd $CACHE_DIR
   chmod a+x $FILE_NAME
-  bash ./$FILE_NAME --appimage-extract
-  mv squashfs-root "libreoffice-${VERSION}"
+  unsquashfs -d "libreoffice-${VERSION}" $FILE_NAME
 
   INSTALLED_VERSION=$(ls "${CACHE_DIR}/libreoffice-${VERSION}/opt")
   cd "${CACHE_DIR}/libreoffice-${VERSION}/usr/bin"
