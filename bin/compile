@@ -52,6 +52,7 @@ libharfbuzz0b
 libharfbuzz-icu0
 libx11-xcb1
 libxcb1
+squashfs-tools
 EOF
 
   apt_deps_buildpack_dir=$(mktemp apt_buildpack_XXXX)
