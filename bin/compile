@@ -82,7 +82,7 @@ FILE_NAME=LibreOffice-${VERSION}.AppImage
 mkdir -p $CACHE_DIR
 if ! [ -e $CACHE_DIR/$FILE_NAME ]; then
   echo "-----> downloading LibreOffice AppImage"
-  curl -L $DOWNLOAD > $CACHE_DIR/$FILE_NAME
+  curl -k -L $DOWNLOAD > $CACHE_DIR/$FILE_NAME
 
   echo "-----> extracting LibreOffice from AppImage archive"
   cd $CACHE_DIR
