@@ -15,6 +15,21 @@ mkdir -p $INSTALL_DIR
 CACHE_DIR=$2 # the contents of CACHE_DIR are persisted between builds
 ENV_DIR=$3
 
+# GitHub refuse par intermittence les clones anonymes depuis les builders Scalingo
+# (« could not read Username ») : repli sur l'archive tar.gz servie par codeload.
+fetch_buildpack() {
+  local url="$1"
+  local dir="$2"
+  if git clone --depth=1 "$url" "$dir" ; then
+    return 0
+  fi
+  local repo="${url#https://github.com/}"
+  repo="${repo%.git}"
+  echo "git clone failed for $url, falling back to tarball"
+  mkdir -p "$dir"
+  curl -fsSL "https://codeload.github.com/${repo}/tar.gz/HEAD" | tar -xz -C "$dir" --strip-components=1
+}
+
 install_jvm() {
   local build_dir="$1"
   local cache_dir="$2"
@@ -29,7 +44,7 @@ install_jvm() {
   rm "$jvm_buildpack_dir"
 
   JVM_BUILDPACK_URL="${JVM_BUILDPACK_URL:-https://github.com/Scalingo/buildpack-jvm-common}"
-  git clone --depth=1 "$JVM_BUILDPACK_URL" "$jvm_buildpack_dir"
+  fetch_buildpack "$JVM_BUILDPACK_URL" "$jvm_buildpack_dir"
 
   "${jvm_buildpack_dir}/bin/compile" "$build_dir" "$cache_dir" "$env_dir"
 
@@ -59,7 +74,7 @@ EOF
   rm "$apt_deps_buildpack_dir"
 
   APT_BUILDPACK_URL="${APT_BUILDPACK_URL:-https://github.com/Scalingo/apt-buildpack}"
-  git clone --depth=1 "$APT_BUILDPACK_URL" "$apt_deps_buildpack_dir"
+  fetch_buildpack "$APT_BUILDPACK_URL" "$apt_deps_buildpack_dir"
 
   "${apt_deps_buildpack_dir}/bin/compile" "$build_dir" "$cache_dir" "$env_dir"
 
