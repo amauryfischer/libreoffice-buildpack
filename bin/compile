@@ -86,18 +86,28 @@ install_apt_deps "$BUILD_DIR" "$CACHE_DIR" "$ENV_DIR"
 
 # libreoffice
 if [ -f $BUILD_DIR/LibreOfficeAppImage ] ; then
-    DOWNLOAD=$(grep http $BUILD_DIR/LibreOfficeAppImage | head -n 1)
+    DOWNLOAD=$(grep http $BUILD_DIR/LibreOfficeAppImage | head -n 1 | tr -d '[:space:]')
 else
     DOWNLOAD="https://appimages.libreitalia.org/LibreOffice-7.2.6.2.basic-x86_64.AppImage"
 fi
-VERSION=$(echo $DOWNLOAD | grep -Poi "(?<=LibreOffice-)[^/]+(?=\.AppImage)")
+VERSION=$(echo $DOWNLOAD | grep -Poi "(?<=LibreOffice-)[^/]+(?=\.(AppImage|tar\.gz))")
 VERSION=${VERSION:-default} # avoid empty version if the grep fails to match
 FILE_NAME=LibreOffice-${VERSION}.AppImage
 
 mkdir -p $CACHE_DIR
-if ! [ -e $CACHE_DIR/$FILE_NAME ]; then
+# Archive usr/ + opt/ déjà extraite (copie de /app/vendor/libreoffice) : les AppImage anciennes disparaissent de
+# libreitalia. Même VERSION que l'AppImage d'origine, donc le cache existant reste valable.
+if ! [ -e $CACHE_DIR/$FILE_NAME ] && [ "${DOWNLOAD%.tar.gz}" != "$DOWNLOAD" ]; then
+  echo "-----> downloading LibreOffice archive"
+  curl -fL --retry 3 -o "$CACHE_DIR/$FILE_NAME.part" "$DOWNLOAD"
+  rm -rf "$CACHE_DIR/libreoffice-${VERSION}"
+  mkdir -p "$CACHE_DIR/libreoffice-${VERSION}"
+  tar -xzf "$CACHE_DIR/$FILE_NAME.part" -C "$CACHE_DIR/libreoffice-${VERSION}"
+  rm "$CACHE_DIR/$FILE_NAME.part"
+  touch "$CACHE_DIR/$FILE_NAME"
+elif ! [ -e $CACHE_DIR/$FILE_NAME ]; then
   echo "-----> downloading LibreOffice AppImage"
-  curl -L $DOWNLOAD > $CACHE_DIR/$FILE_NAME
+  curl -fL --retry 3 $DOWNLOAD > $CACHE_DIR/$FILE_NAME
 
   echo "-----> extracting LibreOffice from AppImage archive"
   cd $CACHE_DIR
